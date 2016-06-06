@@ -1,0 +1,342 @@
+﻿using System;
+using System.Reflection;
+using System.Collections.Generic;
+
+namespace Aiv.Tween {
+
+	public class Tween {
+
+		public delegate void StartHandler(Tween sender);
+
+		public delegate void StopHandler(Tween sender);
+
+		public delegate void UpdateHandler(Tween sender);
+
+		public delegate void KeyFrameHandler(Tween sender);
+
+		public event StartHandler OnStart;
+		public event StartHandler OnStop;
+		public event StartHandler OnUpdate;
+
+		private class KeyFrame {
+
+			private class Iteration {
+				public object target;
+				public PropertyInfo pInfo;
+				public FieldInfo fInfo;
+				public object startValue;
+				public object endValue;
+			}
+
+			public float startedAt;
+
+			private float duration;
+
+			public float Duration {
+				get {
+					return duration;
+				}
+			}
+
+			private List<Iteration> iterations;
+			private EasingFunction easing;
+			private KeyFrameHandler handler;
+
+			public KeyFrame(float duration, EasingFunction easing, KeyFrameHandler handler = null) {
+				this.duration = duration;
+				this.startedAt = 0;
+				this.easing = easing;
+				this.handler = handler;
+				iterations = new List<Iteration>();
+			}
+
+			public float Ease(float k) {
+				return this.easing(k);
+			}
+
+			public void RunHandler(Tween tween) {
+				if (this.handler == null)
+					return;
+				this.handler(tween);
+			}
+
+			public void AddIteration(object target, string name, object value) {
+				PropertyInfo pInfo = target.GetType().GetProperty(name);
+				FieldInfo fInfo = target.GetType().GetField(name);
+				Iteration iteration = new Iteration{ target = target, pInfo = pInfo, fInfo = fInfo };
+				iteration.endValue = value;
+				this.iterations.Add(iteration);
+			}
+
+			public void SetupIterations() {
+				foreach (Iteration iteration in this.iterations) {
+					if (iteration.pInfo != null) {
+						iteration.startValue = iteration.pInfo.GetValue(iteration.target, null);
+					} else if (iteration.fInfo != null) {
+						iteration.startValue = iteration.fInfo.GetValue(iteration.target);
+					}
+
+				}
+			}
+
+			private static object Interpolate(object num1, object num2, float gradient) {
+				return Sum(num1, Mul(Sub(num2, num1), gradient)); 
+			}
+
+			private static object Sum(object num1, object num2) {
+				var sumOp = num1.GetType().GetMethod("op_Addition");
+				if (sumOp == null) {
+					return System.Convert.ToSingle(num1) + System.Convert.ToSingle(num2);
+				}
+				return sumOp.Invoke(null, new object[]{ num1, num2 });
+			}
+
+			private static object Sub(object num1, object num2) {
+				var subOp = num1.GetType().GetMethod("op_Subtraction");
+				if (subOp == null) {
+					return System.Convert.ToSingle(num1) - System.Convert.ToSingle(num2);
+				}
+				return subOp.Invoke(null, new object[]{ num1, num2 });
+			}
+
+			private static object Mul(object num1, object num2) {
+				var mulOp = num1.GetType().GetMethod("op_Multiply", new []{ num1.GetType(), typeof(float) });
+				if (mulOp == null) {
+					return System.Convert.ToSingle(num1) * System.Convert.ToSingle(num2);
+				}
+				return mulOp.Invoke(null, new object[]{ num1, num2 });
+			}
+
+			public void Step(float gradient) {
+				foreach (Iteration iteration in this.iterations) {
+					if (iteration.pInfo != null) {
+						iteration.pInfo.SetValue(iteration.target, Interpolate(iteration.startValue, iteration.endValue, gradient), null);
+					} else if (iteration.fInfo != null) {
+						iteration.fInfo.SetValue(iteration.target, Interpolate(iteration.startValue, iteration.endValue, gradient));
+					}
+				}
+			}
+
+		}
+
+		private List<KeyFrame> keyFrames;
+		private bool isStarted;
+		private int currentKeyFrame;
+
+		/// <summary>
+		/// Easing function.
+		/// </summary>
+		public delegate float EasingFunction(float n);
+
+		private EasingFunction easing;
+		private int repeat;
+		private int currentRound;
+		private float currentGradient;
+		private float now;
+
+		/// <summary>
+		/// Get the current computed Tween gradient.
+		/// </summary>
+		/// <value>The current gradient.</value>
+		public float Gradient {
+			get {
+				return this.currentGradient;
+			}
+		}
+
+		/// <summary>
+		/// Get the current Tween update time
+		/// </summary>
+		/// <value>The current update time.</value>
+		public float Now {
+			get {
+				return this.now;
+			}
+		}
+
+		/// <summary>
+		/// Get the current Tween round.
+		/// </summary>
+		/// <value>The current round.</value>
+		public int Round {
+			get {
+				return this.currentRound;
+			}
+		}
+
+		public Tween() {
+			keyFrames = new List<KeyFrame>();
+			easing = (n => n);
+		}
+
+
+		/// <summary>
+		/// Create a KeyFrame with the specified values
+		/// </summary>
+		/// <param name="target">Target.</param>
+		/// <param name="values">Values.</param>
+		/// <param name="duration">Duration.</param>
+		public Tween To(object target, object values, float duration) {
+			return To(target, values, (object)duration);
+		}
+
+
+		/// <summary>
+		/// Create a KeyFrame with multiple transformations.
+		/// </summary>
+		/// <param name="items">Items (target, properties, target, properties, ... , duration).</param>
+		public Tween To(params object[] items) {
+			if (items.Length < 3)
+				throw new ArgumentException("invalid number of arguments");
+			float duration = (float)items [items.Length - 1];
+
+			KeyFrame keyFrame = new KeyFrame(duration, this.easing);
+
+			for (int i = 0; i < items.Length - 1; i += 2) {
+				object target = items [i];
+				object values = items [i + 1];
+				foreach (PropertyInfo pInfo in values.GetType().GetProperties()) {
+					object endValue = pInfo.GetValue(values, null);
+					keyFrame.AddIteration(target, pInfo.Name, endValue);
+				}
+			}
+
+			this.keyFrames.Add(keyFrame);
+			return this;
+		}
+
+		/// <summary>
+		/// Set the easing function.
+		/// </summary>
+		/// <param name="easing">Easing function.</param>
+		public Tween SetEasing(EasingFunction easing) {
+			this.easing = easing;
+			return this;
+		}
+
+		/// <summary>
+		/// Repeat the Tween animation n times.
+		/// </summary>
+		/// <param name="n">N.</param>
+		public Tween Repeat(int n) {
+			this.repeat = n;
+			return this;
+		}
+
+		/// <summary>
+		/// Loop this Tween.
+		/// </summary>
+		public Tween Loop() {
+			return this.Repeat(-1);
+		}
+
+		/// <summary>
+		/// Add a sleeping keyframe of the specified duration.
+		/// </summary>
+		/// <param name="duration">Duration.</param>
+		public Tween Delay(float duration) {
+			KeyFrame keyFrame = new KeyFrame(duration, this.easing);
+			this.keyFrames.Add(keyFrame);
+			return this;
+		}
+
+		/// <summary>
+		/// Call the specified handler as KeyFrame.
+		/// </summary>
+		/// <param name="handler">Handler.</param>
+		public Tween Call(KeyFrameHandler handler) {
+			KeyFrame keyFrame = new KeyFrame(0, this.easing, handler);
+			this.keyFrames.Add(keyFrame);
+			return this;
+		}
+
+		/// <summary>
+		/// Start the Tween.
+		/// </summary>
+		public Tween Start() {
+			if (this.keyFrames.Count < 1) {
+				throw new Exception("Tween without keyframes");
+			}
+			currentRound = 0;
+			isStarted = true;
+			currentKeyFrame = 0;
+			this.keyFrames [currentKeyFrame].startedAt = -1;
+
+			if (OnStart != null) {
+				OnStart(this);
+			}
+
+			return this;
+		}
+
+		/// <summary>
+		/// Stop the Tween.
+		/// </summary>
+		public Tween Stop() {
+			isStarted = false;
+			if (OnStop != null) {
+				OnStop(this);
+			}
+			return this;
+		}
+
+		/// <summary>
+		/// Update the Tween.
+		/// </summary>
+		/// <param name="now">Now.</param>
+		public void Update(float now) {
+			if (!isStarted)
+				return;
+			// allow the Tween class to export the current time
+			this.now = now;
+			bool nextFrame = false;
+			KeyFrame keyFrame = this.keyFrames [currentKeyFrame];
+			// first round ?
+			if (keyFrame.startedAt < 0) {
+				keyFrame.startedAt = now;
+				keyFrame.SetupIterations();
+			}
+
+			if (keyFrame.Duration > 0) {
+
+				float gradient = (now - keyFrame.startedAt) / keyFrame.Duration;
+				// avoid overflow
+				gradient = gradient > 1 ? 1 : gradient;
+
+				// apply easing
+				this.currentGradient = keyFrame.Ease(gradient);
+
+				// foreach iteration update values
+				keyFrame.Step(this.currentGradient);
+
+				if (gradient >= 1)
+					nextFrame = true;
+			} else {
+				nextFrame = true;
+			}
+
+			keyFrame.RunHandler(this);
+
+			if (OnUpdate != null) {
+				OnUpdate(this);
+			}
+
+			if (nextFrame) {
+				currentKeyFrame++;
+				if (currentKeyFrame >= keyFrames.Count) {
+					currentRound++;
+					if (repeat > -1 && currentRound >= repeat) {
+						this.Stop();
+						return;
+					}
+					// restart
+					currentKeyFrame = 0;
+				}
+				this.keyFrames [currentKeyFrame].startedAt = -1;
+			}
+
+		}
+
+
+	}
+}
