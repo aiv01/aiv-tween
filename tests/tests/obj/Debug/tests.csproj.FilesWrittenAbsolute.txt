@@ -1,0 +1,7 @@
+/Users/roberto/aiv-tween/tests/tests/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/Users/roberto/aiv-tween/tests/tests/bin/Debug/tests.dll.mdb
+/Users/roberto/aiv-tween/tests/tests/bin/Debug/tests.dll
+/Users/roberto/aiv-tween/tests/tests/obj/Debug/tests.dll
+/Users/roberto/aiv-tween/tests/tests/obj/Debug/tests.dll.mdb
+/Users/roberto/aiv-tween/tests/tests/bin/Debug/nunit.framework.dll
+/Users/roberto/aiv-tween/tests/tests/bin/Debug/aiv-tween.dll
