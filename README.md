@@ -84,7 +84,7 @@ public class TweenBehaviour : MonoBehaviour {
 
   void Start() {
     idleAnimation = new Tween().To(transform, new { position = new Vector3(0, 17, 0) }, 3.5f).
-                      To(transform, new { eulerAngles = new Vector3(0, 90, 0) }, 1.5f).
+                      To(transform, new { eulerAngles = new Vector3(0, 90, 0), position = new Vector3(2, 4, 6) }, 1.5f).
                       To(transform, new { eulerAngles = new Vector3(0, -90, 0) }, 1.5f).
                       Start();
   }
