@@ -355,6 +355,7 @@ namespace Aiv.Tween {
 				keyFrame.SetupIterations();
 			}
 
+
 			if (keyFrame.Duration > 0) {
 
 				float gradient = (this.now - keyFrame.startedAt) / keyFrame.Duration;

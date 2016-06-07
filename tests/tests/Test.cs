@@ -180,6 +180,37 @@ namespace tests
 		}
 
 		[Test ()]
+		public void TestKeyFrameStartedAt ()
+		{
+			Tween tween = new Tween ().Nop ().Nop ().Start ();
+			tween.Update (17);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 17);
+			tween.Update (26);
+			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 17);
+			tween.Update (30);
+			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 17);
+		}
+
+		[Test ()]
+		public void TestKeyFrameStartedAtWithLoop ()
+		{
+			Tween tween = new Tween ().Nop ().Nop ().Loop ().Start ();
+			tween.Update (17);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 17);
+			tween.Update (26);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 26);
+			tween.Update (30);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 30);
+			tween.Update (173);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 173);
+		}
+
+		[Test ()]
 		public void TestRedKeyFrameIndex ()
 		{
 			this.genericValue = 0;
@@ -200,6 +231,45 @@ namespace tests
 			tween.Update (0).Update (1).Update (2);
 
 			Assert.AreEqual (counter, 3);
+		}
+
+		[Test ()]
+		public void TestStartEvent ()
+		{
+			int counter = 0;
+			Tween tween = new Tween ().Delay (100);
+			tween.OnStart += (t => counter++);
+			tween.Start ();
+
+			tween.Update (0).Update (1).Update (2);
+
+			Assert.AreEqual (counter, 1);
+		}
+
+		[Test ()]
+		public void TestRedStopEvent ()
+		{
+			int counter = 0;
+			Tween tween = new Tween ().Delay (100).Loop ();
+			tween.OnStop += (t => counter++);
+			tween.Start ();
+
+			tween.Update (0).Update (101);
+
+			Assert.AreNotEqual (counter, 1);
+		}
+
+		[Test ()]
+		public void TestStopEvent ()
+		{
+			int counter = 0;
+			Tween tween = new Tween ().Delay (100);
+			tween.OnStop += (t => counter++);
+			tween.Start ();
+
+			tween.Update (0).Update (101);
+
+			Assert.AreEqual (counter, 1);
 		}
 
 		[Test ()]
