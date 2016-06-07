@@ -22,6 +22,7 @@ namespace Aiv.Tween {
 
 			private class Iteration {
 				public object target;
+				public string fieldName;
 				public PropertyInfo pInfo;
 				public FieldInfo fInfo;
 				public object startValue;
@@ -64,6 +65,7 @@ namespace Aiv.Tween {
 				PropertyInfo pInfo = target.GetType().GetProperty(name);
 				FieldInfo fInfo = target.GetType().GetField(name);
 				Iteration iteration = new Iteration{ target = target, pInfo = pInfo, fInfo = fInfo };
+				iteration.fieldName = name;
 				iteration.endValue = value;
 				this.iterations.Add(iteration);
 			}
@@ -72,10 +74,13 @@ namespace Aiv.Tween {
 				foreach (Iteration iteration in this.iterations) {
 					if (iteration.pInfo != null) {
 						iteration.startValue = iteration.pInfo.GetValue(iteration.target, null);
-					} else if (iteration.fInfo != null) {
-						iteration.startValue = iteration.fInfo.GetValue(iteration.target);
+						return;
 					}
 
+					if (iteration.fInfo != null) {
+						iteration.startValue = iteration.fInfo.GetValue(iteration.target);
+						return;
+					}
 				}
 			}
 
@@ -111,8 +116,12 @@ namespace Aiv.Tween {
 				foreach (Iteration iteration in this.iterations) {
 					if (iteration.pInfo != null) {
 						iteration.pInfo.SetValue(iteration.target, Interpolate(iteration.startValue, iteration.endValue, gradient), null);
-					} else if (iteration.fInfo != null) {
+						return;
+
+					}
+					if (iteration.fInfo != null) {
 						iteration.fInfo.SetValue(iteration.target, Interpolate(iteration.startValue, iteration.endValue, gradient));
+						return;
 					}
 				}
 			}
@@ -284,9 +293,9 @@ namespace Aiv.Tween {
 		/// Update the Tween.
 		/// </summary>
 		/// <param name="now">Now.</param>
-		public void Update(float now) {
+		public Tween Update(float now) {
 			if (!isStarted)
-				return;
+				return this;
 			// allow the Tween class to export the current time
 			this.now = now;
 			bool nextFrame = false;
@@ -327,7 +336,7 @@ namespace Aiv.Tween {
 					currentRound++;
 					if (repeat > -1 && currentRound >= repeat) {
 						this.Stop();
-						return;
+						return this;
 					}
 					// restart
 					currentKeyFrame = 0;
@@ -335,6 +344,8 @@ namespace Aiv.Tween {
 				this.keyFrames [currentKeyFrame].startedAt = -1;
 			}
 
+
+			return this;
 		}
 
 
