@@ -1,2 +1,2 @@
 all:
-	mcs -target:library -out:aiv-tween.dll src/Tween.cs src/Easing.cs
+	mcs -sdk:2 -target:library -out:aiv-tween.dll src/Tween.cs src/Easing.cs
