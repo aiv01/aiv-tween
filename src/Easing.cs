@@ -4,6 +4,7 @@ namespace Aiv.Tween {
 
 	/// <summary>
 	/// Easing functions.
+	/// Porting of https://github.com/tweenjs/tween.js/ and Robert Penner's equations.
 	/// </summary>
 	public static class Easing {
 
