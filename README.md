@@ -3,6 +3,22 @@ Aiv.Tween portable .Net module. Tested with AIV libraries and Unity3D
 
 This is a reflection-based Tween implementation + a bunch of Easing functions taken from the https://github.com/tweenjs/tween.js project
 
+Installation
+------------
+
+Unity3D:
+
+Just download the unity package and import in your project
+
+Others:
+
+place the DLL in your project or add the Tween.cs file (found into src/). The Easing.cs file contains the easing functions
+and it is totally optional
+
+Unit tests:
+
+they use NUnit (a complete solution is available in the repository)
+
 Usage
 -----
 
