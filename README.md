@@ -262,12 +262,11 @@ Events
 Currently the following events are defined:
 
 ```cs
-
-    	public delegate void StartHandler(Tween sender);
-    	public delegate void StopHandler(Tween sender);
-	public delegate void UpdateHandler(Tween sender);
+public delegate void StartHandler(Tween sender);
+public delegate void StopHandler(Tween sender);
+public delegate void UpdateHandler(Tween sender);
 		
-    	public event StartHandler OnStart;
-	public event StopHandler OnStop;
-	public event UpdateHandler OnUpdate;
+public event StartHandler OnStart;
+public event StopHandler OnStop;
+public event UpdateHandler OnUpdate;
 ```
