@@ -268,6 +268,7 @@ namespace tests
 		[Test ()]
 		public void TestEasing ()
 		{
+			this.genericValue = 0;
 			Tween tween = new Tween ().SetEasing (k => 0);
 			tween.To (this, new {genericValue = 173}, 1).Start ();
 			tween.Update (0).Update (100).Update (200);
@@ -321,6 +322,41 @@ namespace tests
 			tween.Update (0.5f);
 			Assert.AreNotEqual (tween.Now, 0.1f);
 
+		}
+
+		[Test ()]
+		public void TestDeltaUpdate ()
+		{
+			this.genericValue = 0;
+			Tween tween = new Tween ();
+			tween.To (this, new {genericValue = 173}, 1);
+			tween.To (this, new {genericValue = 26}, 1);
+			tween.Start ();
+			tween.DeltaUpdate (1);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (this.genericValue, 173);
+			tween.DeltaUpdate (0.5f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (this.genericValue, 99.5f);
+			tween.DeltaUpdate (0.5f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (this.genericValue, 26);
+			tween.DeltaUpdate (0.5f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (this.genericValue, 26);
+
+		}
+
+		[Test ()]
+		public void TestLoopIndex ()
+		{
+			Tween tween = new Tween ().Nop ().Nop ().Nop ().Loop ().Start ();
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 2);
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
 		}
 	}
 }

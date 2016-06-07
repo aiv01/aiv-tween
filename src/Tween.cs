@@ -163,6 +163,7 @@ namespace Aiv.Tween {
 		private int currentRound;
 		private float currentGradient;
 		private float now;
+		private float deltaNowAccumulator;
 
 		/// <summary>
 		/// Get the current computed Tween gradient.
@@ -289,6 +290,7 @@ namespace Aiv.Tween {
 			return this;
 		}
 
+
 		/// <summary>
 		/// Start the Tween.
 		/// </summary>
@@ -300,6 +302,7 @@ namespace Aiv.Tween {
 			this.isStarted = true;
 			this.currentKeyFrame = 0;
 			this.keyFrames [currentKeyFrame].startedAt = -1;
+			this.deltaNowAccumulator = 0;
 
 			if (OnStart != null) {
 				OnStart(this);
@@ -317,6 +320,21 @@ namespace Aiv.Tween {
 				OnStop(this);
 			}
 			return this;
+		}
+
+		/// <summary>
+		/// Update the Tween with a deltaTime.
+		/// </summary>
+		/// <param name="deltaTime">deltaTime.</param>
+		public Tween DeltaUpdate(float deltaTime) {
+			// special condition for first round
+			KeyFrame keyFrame = this.keyFrames [currentKeyFrame];
+			if (keyFrame.startedAt < 0) {
+                                keyFrame.startedAt = 0;
+                                keyFrame.SetupIterations();
+                        }
+			this.deltaNowAccumulator += deltaTime;
+			return this.Update(this.deltaNowAccumulator);
 		}
 
 		/// <summary>
