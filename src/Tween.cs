@@ -18,12 +18,6 @@ namespace Aiv.Tween {
 		public event StopHandler OnStop;
 		public event UpdateHandler OnUpdate;
 
-		public enum RecursionMode {
-			Off,
-			OneTime,
-			Infinite
-		}
-
 		private class KeyFrame {
 
 			private class Iteration {
@@ -141,8 +135,6 @@ namespace Aiv.Tween {
 			}
 		}
 
-		public RecursionMode recursionMode;
-
 		private bool isPaused;
                 public bool IsPaused {
 			get {
@@ -214,7 +206,6 @@ namespace Aiv.Tween {
 		public Tween() {
 			this.keyFrames = new List<KeyFrame>();
 			this.easing = (n => n);
-			this.recursionMode = RecursionMode.OneTime;
 		}
 
 
@@ -267,6 +258,19 @@ namespace Aiv.Tween {
 		/// </summary>
 		/// <param name="n">N.</param>
 		public Tween Repeat(int n) {
+			// check for loops
+			if (n < 0) {
+				bool safe = false;
+				foreach(KeyFrame keyFrame in this.keyFrames) {
+					if (keyFrame.Duration > 0) {
+						safe = true;
+						break;
+					}
+				}
+				if (!safe) {
+					throw new Exception("Loop detected");
+				}
+			}
 			this.repeat = n;
 			return this;
 		}
@@ -430,21 +434,9 @@ namespace Aiv.Tween {
 				}
 				this.keyFrames [this.currentKeyFrame].startedAt = this.now;
 				this.keyFrames [this.currentKeyFrame].SetupIterations();
-                                // call non-time-based following keyframe as soon as possible
-				// this performance-optimization works only if the current frame is time based ! (this avoids loop)
+                                // call non-time-based following keyframes as soon as possible
 				if (this.keyFrames [this.currentKeyFrame].Duration <= 0) {
-					switch(this.recursionMode) {
-						case(RecursionMode.OneTime):
-							if (keyFrame.Duration > 0) {
-								this.Update(0);
-							}
-							break;
-						case(RecursionMode.Infinite):
-							this.Update(0);
-							break;
-						default:
-							break;
-					}
+					this.Update(0);
 				}
 			}
 

@@ -47,6 +47,14 @@ namespace tests
 		}
 
 		[Test ()]
+		[ExpectedException (typeof(Exception))]
+		public void TestRedLoopyLoop ()
+		{
+			Tween tween = new Tween ();
+			tween.Loop().Start ();
+		}
+
+		[Test ()]
 		public void TestGreenStart ()
 		{
 			Tween tween = new Tween ();
@@ -120,7 +128,7 @@ namespace tests
 		{
 
 			int counter = 0;
-			Tween tween = new Tween ().Call (t => counter++);
+			Tween tween = new Tween ().Call (t => counter++).Delay(0.1f);
 			tween.Loop ().Start ();
 			tween.Update (0).Update (1).Update (2).Update (100);
 			Assert.AreNotEqual (counter, 3);
@@ -153,7 +161,7 @@ namespace tests
 		{
 
 			int counter = 0;
-			Tween tween = new Tween ().Call (t => counter++).Loop ().Start ();
+			Tween tween = new Tween ().Call (t => counter++).Delay(0.1f).Loop ().Start ();
 			tween.Update (0);
 			Assert.AreEqual (counter, 1);
 			tween.Pause ();
@@ -458,21 +466,7 @@ namespace tests
 			tween.DeltaUpdate (0.1f);
 			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
 		}
-
-		[Test ()]
-		public void TestLoopIndexWithNopAndNoRecursion ()
-		{
-			Tween tween = new Tween ().Delay (0.1f).Nop ().Delay (0.1f).Nop ().Delay (0.1f).Loop ().Start ();
-			tween.recursionMode = Tween.RecursionMode.Off;
-			tween.DeltaUpdate (0.1f);
-			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
-			tween.DeltaUpdate (0.1f);
-			Assert.AreEqual (tween.CurrentKeyFrameIndex, 2);
-			tween.DeltaUpdate (0.1f);
-			Assert.AreEqual (tween.CurrentKeyFrameIndex, 3);
-			tween.DeltaUpdate (0.1f).DeltaUpdate (0.1f).DeltaUpdate (0.1f);
-			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
-		}
+			
 
 
 	}
