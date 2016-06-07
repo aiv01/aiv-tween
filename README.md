@@ -3,6 +3,24 @@ Aiv.Tween portable .Net module. Tested with AIV libraries and Unity3D
 
 This is a reflection-based Tween implementation + a bunch of Easing functions taken from the https://github.com/tweenjs/tween.js project
 
+Its main usage is teaching reflection, delegates and events
+
+Installation
+------------
+
+Unity3D:
+
+Just download the unity package and import in your project
+
+Others:
+
+place the DLL in your project or add the Tween.cs file (found into src/). The Easing.cs file contains the easing functions
+and it is totally optional
+
+Unit tests:
+
+they use NUnit (a complete solution is available in the repository)
+
 Usage
 -----
 
@@ -30,6 +48,16 @@ idleAnimation.To(transform, new { position = new Vector3(0, 17, 0) }, 3.5f);
 
 this will update the transform.position (like in Unity3D) field with the value Vector3(0, 17, 0) in 3.5 seconds
 
+You can add multiple iterations to the same keyframe:
+
+
+```cs
+Tween idleAnimation = new Tween();
+idleAnimation.To(transform, new { position = new Vector3(0, 17, 0) }, GetComponent<Renderer>().material, new {color = Color.blue}, 3.5f);
+```
+
+Note: the last argument is always the animation time/length
+
 Start()
 -------
 
@@ -56,7 +84,7 @@ public class TweenBehaviour : MonoBehaviour {
 
   void Start() {
     idleAnimation = new Tween().To(transform, new { position = new Vector3(0, 17, 0) }, 3.5f).
-                      To(transform, new { eulerAngles = new Vector3(0, 90, 0) }, 1.5f).
+                      To(transform, new { eulerAngles = new Vector3(0, 90, 0), position = new Vector3(2, 4, 6) }, 1.5f).
                       To(transform, new { eulerAngles = new Vector3(0, -90, 0) }, 1.5f).
                       Start();
   }
@@ -92,6 +120,8 @@ public class TweenBehaviour : MonoBehaviour {
   }
 }
 ```
+
+Note for Unity: use transform.eulerAngles for rotations, as Quaternions cannot be easily interpolated
 
 Delay(float t)
 --------------
@@ -235,18 +265,38 @@ The Stop() method is automatically called on Animation end.
 
 To restart a stopped animation you need to call Start() again
 
+
+Pause()/Resume()
+----------------
+
+```cs
+	// Update is called once per frame
+	void Update() {
+		rotating.DeltaUpdate(Time.deltaTime);
+
+		if (Input.GetMouseButtonDown(0)) {
+			rotating.Pause();
+		}
+
+		if (Input.GetMouseButtonDown(1)) {
+			rotating.Resume();
+		}
+	}
+```
+
+'rotating' here is a Tween animation
+
 Events
 ------
 
 Currently the following events are defined:
 
 ```cs
-
-    public delegate void StartHandler(Tween sender);
-    public delegate void StopHandler(Tween sender);
-		public delegate void UpdateHandler(Tween sender);
+public delegate void StartHandler(Tween sender);
+public delegate void StopHandler(Tween sender);
+public delegate void UpdateHandler(Tween sender);
 		
-    public event StartHandler OnStart;
-		public event StopHandler OnStop;
-		public event UpdateHandler OnUpdate;
+public event StartHandler OnStart;
+public event StopHandler OnStop;
+public event UpdateHandler OnUpdate;
 ```
