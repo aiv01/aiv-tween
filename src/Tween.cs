@@ -147,6 +147,12 @@ namespace Aiv.Tween {
 			}
 		}
 
+                public float CurrentKeyFrameStartedAt {
+			get {
+				return this.keyFrames[this.currentKeyFrame].startedAt;
+			}
+		}
+
 		/// <summary>
 		/// Easing function.
 		/// </summary>
@@ -189,8 +195,8 @@ namespace Aiv.Tween {
 		}
 
 		public Tween() {
-			keyFrames = new List<KeyFrame>();
-			easing = (n => n);
+			this.keyFrames = new List<KeyFrame>();
+			this.easing = (n => n);
 		}
 
 
@@ -290,9 +296,9 @@ namespace Aiv.Tween {
 			if (this.keyFrames.Count < 1) {
 				throw new Exception("Tween without keyframes");
 			}
-			currentRound = 0;
-			isStarted = true;
-			currentKeyFrame = 0;
+			this.currentRound = 0;
+			this.isStarted = true;
+			this.currentKeyFrame = 0;
 			this.keyFrames [currentKeyFrame].startedAt = -1;
 
 			if (OnStart != null) {
@@ -322,6 +328,7 @@ namespace Aiv.Tween {
 				return this;
 			// allow the Tween class to export the current time
 			this.now = now;
+
 			bool nextFrame = false;
 			KeyFrame keyFrame = this.keyFrames [currentKeyFrame];
 			// first round ?
@@ -332,7 +339,7 @@ namespace Aiv.Tween {
 
 			if (keyFrame.Duration > 0) {
 
-				float gradient = (now - keyFrame.startedAt) / keyFrame.Duration;
+				float gradient = (this.now - keyFrame.startedAt) / keyFrame.Duration;
 				// avoid overflow
 				gradient = gradient > 1 ? 1 : gradient;
 
@@ -355,17 +362,20 @@ namespace Aiv.Tween {
 			}
 
 			if (nextFrame) {
-				currentKeyFrame++;
-				if (currentKeyFrame >= keyFrames.Count) {
-					currentRound++;
-					if (repeat > -1 && currentRound >= repeat) {
+				if (this.currentKeyFrame+1 >= this.keyFrames.Count) {
+					// restart ?
+					this.currentRound++;
+					if (this.repeat > -1 && this.currentRound >= this.repeat) {
 						this.Stop();
 						return this;
 					}
-					// restart
-					currentKeyFrame = 0;
+					this.currentKeyFrame = 0;
 				}
-				this.keyFrames [currentKeyFrame].startedAt = -1;
+				else {
+					this.currentKeyFrame++;
+				}
+				this.keyFrames [this.currentKeyFrame].startedAt = this.now;
+				this.keyFrames [this.currentKeyFrame].SetupIterations();
 			}
 
 

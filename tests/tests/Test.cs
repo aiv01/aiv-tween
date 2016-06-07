@@ -264,6 +264,64 @@ namespace tests
 			Assert.AreEqual (fooBar.counter, 17f / 2);
 
 		}
+
+		[Test ()]
+		public void TestEasing ()
+		{
+			Tween tween = new Tween ().SetEasing (k => 0);
+			tween.To (this, new {genericValue = 173}, 1).Start ();
+			tween.Update (0).Update (100).Update (200);
+			Assert.AreEqual (this.genericValue, 0);
+
+		}
+
+		[Test ()]
+		public void TestMultiTo ()
+		{
+			this.genericValue = 0;
+			Tween tween = new Tween ();
+			tween.To (this, new {genericValue = 173}, 1);
+			tween.To (this, new {genericValue = 26}, 1);
+			tween.Start ();
+			tween.Update (0);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+			Assert.AreEqual (this.genericValue, 0);
+			tween.Update (1);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (this.genericValue, 173);
+			tween.Update (2);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (this.genericValue, 26);
+
+		}
+
+		[Test ()]
+		public void TestMultiEasing ()
+		{
+			Tween tween = new Tween ();
+			tween.SetEasing (k => 1).To (this, new {genericValue = 173}, 1);
+			tween.SetEasing (k => 2).To (this, new {genericValue = 250}, 1);
+			tween.Start ().Update (0);
+			Assert.AreEqual (this.genericValue, 173);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+			tween.Update (0.5f);
+			Assert.AreEqual (this.genericValue, 173);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+			tween.Update (1);
+			Assert.AreEqual (this.genericValue, 173);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			tween.Update (2);
+			Assert.AreEqual (this.genericValue, 327);
+		}
+
+		[Test ()]
+		public void TestRedNow ()
+		{
+			Tween tween = new Tween ().Nop ().Start ();
+			tween.Update (0.5f);
+			Assert.AreNotEqual (tween.Now, 0.1f);
+
+		}
 	}
 }
 
