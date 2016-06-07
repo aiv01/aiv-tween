@@ -300,3 +300,9 @@ public event StartHandler OnStart;
 public event StopHandler OnStop;
 public event UpdateHandler OnUpdate;
 ```
+
+Recursion Mode
+--------------
+
+By default a "fast keyframe" (a keyframe without duration, like Call, or Nop) is called soon after the current frame, but only if the current frame has a duration. This is a security measure to avoid unexpected loops. If you are absolutely sure your animation will not generate a code-loop you can enable "infinite" recursion mode using the 'recursionMode' boolean field.
+If you do not want the recursion mode, you can completely turn it off setting 'recursionMode' to Off.
