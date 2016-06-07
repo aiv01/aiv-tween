@@ -224,8 +224,29 @@ public class TweenBehaviour : MonoBehaviour {
     idleAnimation.DeltaUpdate(Time.deltaTime);
   }
   
-  private void SayHello(Tween t) {
-    Debug.Log("Hello");
-  }
 }
+```
+
+Stop()
+------
+
+You can stop an animation whenever you want with the Stop() method.
+The Stop() method is automatically called on Animation end.
+
+To restart a stopped animation you need to call Start() again
+
+Events
+------
+
+Currently the following events are defined:
+
+```cs
+
+    public delegate void StartHandler(Tween sender);
+    public delegate void StopHandler(Tween sender);
+		public delegate void UpdateHandler(Tween sender);
+		
+    public event StartHandler OnStart;
+		public event StopHandler OnStop;
+		public event UpdateHandler OnUpdate;
 ```
