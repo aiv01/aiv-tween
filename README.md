@@ -235,6 +235,27 @@ The Stop() method is automatically called on Animation end.
 
 To restart a stopped animation you need to call Start() again
 
+
+Pause()/Resume()
+----------------
+
+```cs
+	// Update is called once per frame
+	void Update() {
+		rotating.DeltaUpdate(Time.deltaTime);
+
+		if (Input.GetMouseButtonDown(0)) {
+			rotating.Pause();
+		}
+
+		if (Input.GetMouseButtonDown(1)) {
+			rotating.Resume();
+		}
+	}
+```
+
+'rotating' here is a Tween animation
+
 Events
 ------
 
@@ -242,11 +263,11 @@ Currently the following events are defined:
 
 ```cs
 
-    public delegate void StartHandler(Tween sender);
-    public delegate void StopHandler(Tween sender);
-		public delegate void UpdateHandler(Tween sender);
+    	public delegate void StartHandler(Tween sender);
+    	public delegate void StopHandler(Tween sender);
+	public delegate void UpdateHandler(Tween sender);
 		
-    public event StartHandler OnStart;
-		public event StopHandler OnStop;
-		public event UpdateHandler OnUpdate;
+    	public event StartHandler OnStart;
+	public event StopHandler OnStop;
+	public event UpdateHandler OnUpdate;
 ```
