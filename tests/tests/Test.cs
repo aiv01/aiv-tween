@@ -2,7 +2,7 @@
 using System;
 using Aiv.Tween;
 using System.Collections.Generic;
-
+using System.Reflection;
 
 namespace tests
 {
@@ -26,6 +26,8 @@ namespace tests
 
 			}
 		}
+
+		public float genericValue;
 
 		[Test ()]
 		public void TestInitialization ()
@@ -134,6 +136,93 @@ namespace tests
 			tween.Update (0).Update (1).Update (2);
 			Assert.AreEqual (counter, 2);
 		}
+
+		[Test ()]
+		public void TestRound ()
+		{
+
+			int counter = 0;
+			Tween tween = new Tween ().Call (t => counter++);
+			tween.Repeat (2).Start ();
+			tween.Update (0).Update (1).Update (2);
+			Assert.AreEqual (tween.Round, 2);
+		}
+
+		[Test ()]
+		public void TestField ()
+		{
+
+			this.genericValue = 17;
+			Tween tween = new Tween ();
+			tween.To (this, new {genericValue = 30}, 1);
+			tween.Start ();
+			tween.Update (0).Update (1);
+			Assert.AreEqual (this.genericValue, 30);
+		}
+
+		[Test ()]
+		public void TestGradient ()
+		{
+			this.genericValue = 0;
+			Tween tween = new Tween ().To (this, new {genericValue = 1}, 1);
+			tween.Start ().Update (0).Update (0.5f);
+			Assert.AreEqual (tween.Gradient, 0.5f);
+		}
+
+		[Test ()]
+		public void TestKeyFrameIndex ()
+		{
+			this.genericValue = 0;
+			Tween tween = new Tween ().To (this, new {genericValue = 1}, 1);
+			tween.To (this, new {genericValue = 10}, 2);
+			tween.Start ().Update (0).Update (1.5f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+		}
+
+		[Test ()]
+		public void TestRedKeyFrameIndex ()
+		{
+			this.genericValue = 0;
+			Tween tween = new Tween ().To (this, new {genericValue = 1}, 1);
+			tween.To (this, new {genericValue = 10}, 2);
+			tween.Start ().Update (0).Update (0.5f);
+			Assert.AreNotEqual (tween.CurrentKeyFrameIndex, 2);
+		}
+
+		[Test ()]
+		public void TestUpdateEvent ()
+		{
+			int counter = 0;
+			Tween tween = new Tween ().Delay (100);
+			tween.OnUpdate += (t => counter++);
+			tween.Start ();
+
+			tween.Update (0).Update (1).Update (2);
+
+			Assert.AreEqual (counter, 3);
+		}
+
+		[Test ()]
+		public void TestDelay ()
+		{
+			Tween tween = new Tween ().Delay (100);
+			tween.Start ();
+
+			tween.Update (0).Update (101);
+
+			Assert.IsFalse (tween.IsPlaying);
+		}
+
+		[Test ()]
+		public void TestStart ()
+		{
+			Tween tween = new Tween ().Delay (100);
+			Assert.IsFalse (tween.IsPlaying);
+			tween.Start ();
+			Assert.IsTrue (tween.IsPlaying);
+		}
+
+
 	}
 }
 

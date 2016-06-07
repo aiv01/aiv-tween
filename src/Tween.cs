@@ -130,7 +130,17 @@ namespace Aiv.Tween {
 
 		private List<KeyFrame> keyFrames;
 		private bool isStarted;
+                public bool IsPlaying {
+			get {
+				return this.isStarted;
+			}
+		}
 		private int currentKeyFrame;
+                public int CurrentKeyFrameIndex {
+			get {
+				return this.currentKeyFrame;
+			}
+		}
 
 		/// <summary>
 		/// Easing function.
