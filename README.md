@@ -30,6 +30,16 @@ idleAnimation.To(transform, new { position = new Vector3(0, 17, 0) }, 3.5f);
 
 this will update the transform.position (like in Unity3D) field with the value Vector3(0, 17, 0) in 3.5 seconds
 
+You can add multiple iterations to the same keyframe:
+
+
+```cs
+Tween idleAnimation = new Tween();
+idleAnimation.To(transform, new { position = new Vector3(0, 17, 0) }, GetComponent<Renderer>().material, new {color = Color.blue}, 3.5f);
+```
+
+Note: the last argument is always the animation time/length
+
 Start()
 -------
 
