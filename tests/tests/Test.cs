@@ -109,10 +109,10 @@ namespace tests
 		{
 
 			int counter = 0;
-			Tween tween = new Tween ().Call (t => counter++);
+			Tween tween = new Tween ().Delay (1).Call (t => counter++);
 			tween.Loop ().Start ();
 			tween.Update (0).Update (1).Update (2);
-			Assert.AreEqual (counter, 3);
+			Assert.AreEqual (counter, 2);
 		}
 
 		[Test ()]
@@ -153,7 +153,7 @@ namespace tests
 		{
 
 			int counter = 0;
-			Tween tween = new Tween ().Call (t => counter++).Loop ().Start();
+			Tween tween = new Tween ().Call (t => counter++).Loop ().Start ();
 			tween.Update (0);
 			Assert.AreEqual (counter, 1);
 			tween.Pause ();
@@ -213,18 +213,18 @@ namespace tests
 		[Test ()]
 		public void TestKeyFrameStartedAtWithLoop ()
 		{
-			Tween tween = new Tween ().Nop ().Nop ().Loop ().Start ();
+			Tween tween = new Tween ().Delay (1).Delay (1).Loop ().Start ();
 			tween.Update (17);
-			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
 			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 17);
 			tween.Update (26);
-			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
 			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 26);
 			tween.Update (30);
-			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
 			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 30);
 			tween.Update (173);
-			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
 			Assert.AreEqual (tween.CurrentKeyFrameStartedAt, 173);
 		}
 
@@ -438,7 +438,7 @@ namespace tests
 		[Test ()]
 		public void TestLoopIndex ()
 		{
-			Tween tween = new Tween ().Nop ().Nop ().Nop ().Loop ().Start ();
+			Tween tween = new Tween ().Delay (0.1f).Delay (0.1f).Delay (0.1f).Loop ().Start ();
 			tween.DeltaUpdate (0.1f);
 			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
 			tween.DeltaUpdate (0.1f);
@@ -446,6 +446,35 @@ namespace tests
 			tween.DeltaUpdate (0.1f);
 			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
 		}
+
+		[Test ()]
+		public void TestLoopIndexWithNop ()
+		{
+			Tween tween = new Tween ().Delay (0.1f).Nop ().Delay (0.1f).Nop ().Delay (0.1f).Loop ().Start ();
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 2);
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 4);
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+		}
+
+		[Test ()]
+		public void TestLoopIndexWithNopAndNoRecursion ()
+		{
+			Tween tween = new Tween ().Delay (0.1f).Nop ().Delay (0.1f).Nop ().Delay (0.1f).Loop ().Start ();
+			tween.recursionMode = Tween.RecursionMode.Off;
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 1);
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 2);
+			tween.DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 3);
+			tween.DeltaUpdate (0.1f).DeltaUpdate (0.1f).DeltaUpdate (0.1f);
+			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
+		}
+
+
 	}
 }
 
