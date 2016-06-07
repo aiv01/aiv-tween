@@ -149,6 +149,24 @@ namespace tests
 		}
 
 		[Test ()]
+		public void TestPause ()
+		{
+
+			int counter = 0;
+			Tween tween = new Tween ().Call (t => counter++).Loop ().Start();
+			tween.Update (0);
+			Assert.AreEqual (counter, 1);
+			tween.Pause ();
+			tween.Update (1);
+			Assert.AreEqual (counter, 1);
+			tween.Update (2);
+			Assert.AreEqual (counter, 1);
+			tween.Resume ();
+			tween.Update (3);
+			Assert.AreEqual (counter, 2);
+		}
+
+		[Test ()]
 		public void TestField ()
 		{
 

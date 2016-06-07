@@ -15,8 +15,8 @@ namespace Aiv.Tween {
 		public delegate void KeyFrameHandler(Tween sender);
 
 		public event StartHandler OnStart;
-		public event StartHandler OnStop;
-		public event StartHandler OnUpdate;
+		public event StopHandler OnStop;
+		public event UpdateHandler OnUpdate;
 
 		private class KeyFrame {
 
@@ -134,6 +134,14 @@ namespace Aiv.Tween {
 				return this.isStarted;
 			}
 		}
+
+		private bool isPaused;
+                public bool IsPaused {
+			get {
+				return this.isPaused;
+			}
+		}
+
 		private int currentKeyFrame;
                 public int CurrentKeyFrameIndex {
 			get {
@@ -298,6 +306,7 @@ namespace Aiv.Tween {
 			if (this.keyFrames.Count < 1) {
 				throw new Exception("Tween without keyframes");
 			}
+			this.isPaused = false;
 			this.currentRound = 0;
 			this.isStarted = true;
 			this.currentKeyFrame = 0;
@@ -322,11 +331,26 @@ namespace Aiv.Tween {
 			return this;
 		}
 
+		public Tween Pause() {
+			this.isPaused = true;
+                        return this;
+                }
+
+		public Tween Resume() {
+			this.isPaused = false;
+                        return this;
+                }
+
 		/// <summary>
 		/// Update the Tween with a deltaTime.
 		/// </summary>
 		/// <param name="deltaTime">deltaTime.</param>
 		public Tween DeltaUpdate(float deltaTime) {
+			// redundancy, required for avoiding increasing timesteps
+			if (!isStarted)
+				return this;
+			if (isPaused)
+				return this;
 			// special condition for first round
 			KeyFrame keyFrame = this.keyFrames [currentKeyFrame];
 			if (keyFrame.startedAt < 0) {
@@ -343,6 +367,8 @@ namespace Aiv.Tween {
 		/// <param name="now">Now.</param>
 		public Tween Update(float now) {
 			if (!isStarted)
+				return this;
+			if (isPaused)
 				return this;
 			// allow the Tween class to export the current time
 			this.now = now;
