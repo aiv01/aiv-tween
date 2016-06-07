@@ -74,12 +74,12 @@ namespace Aiv.Tween {
 				foreach (Iteration iteration in this.iterations) {
 					if (iteration.pInfo != null) {
 						iteration.startValue = iteration.pInfo.GetValue(iteration.target, null);
-						return;
+						continue;
 					}
 
 					if (iteration.fInfo != null) {
 						iteration.startValue = iteration.fInfo.GetValue(iteration.target);
-						return;
+						continue;
 					}
 				}
 			}
@@ -116,12 +116,11 @@ namespace Aiv.Tween {
 				foreach (Iteration iteration in this.iterations) {
 					if (iteration.pInfo != null) {
 						iteration.pInfo.SetValue(iteration.target, Interpolate(iteration.startValue, iteration.endValue, gradient), null);
-						return;
-
+						continue;
 					}
 					if (iteration.fInfo != null) {
 						iteration.fInfo.SetValue(iteration.target, Interpolate(iteration.startValue, iteration.endValue, gradient));
-						return;
+						continue;
 					}
 				}
 			}
@@ -139,6 +138,12 @@ namespace Aiv.Tween {
                 public int CurrentKeyFrameIndex {
 			get {
 				return this.currentKeyFrame;
+			}
+		}
+
+                public int KeyFramesCount {
+			get {
+				return this.keyFrames.Count;
 			}
 		}
 
@@ -207,7 +212,7 @@ namespace Aiv.Tween {
 		public Tween To(params object[] items) {
 			if (items.Length < 3)
 				throw new ArgumentException("invalid number of arguments");
-			float duration = (float)items [items.Length - 1];
+			float duration = System.Convert.ToSingle(items [items.Length - 1]);
 
 			KeyFrame keyFrame = new KeyFrame(duration, this.easing);
 
@@ -265,6 +270,15 @@ namespace Aiv.Tween {
 		/// <param name="handler">Handler.</param>
 		public Tween Call(KeyFrameHandler handler) {
 			KeyFrame keyFrame = new KeyFrame(0, this.easing, handler);
+			this.keyFrames.Add(keyFrame);
+			return this;
+		}
+
+		/// <summary>
+		/// Empty KeyFrame.
+		/// </summary>
+		public Tween Nop() {
+			KeyFrame keyFrame = new KeyFrame(0, this.easing, null);
 			this.keyFrames.Add(keyFrame);
 			return this;
 		}

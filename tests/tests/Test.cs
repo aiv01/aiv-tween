@@ -214,7 +214,18 @@ namespace tests
 		}
 
 		[Test ()]
-		public void TestStart ()
+		public void TestRedDelay ()
+		{
+			Tween tween = new Tween ().Delay (100);
+			tween.Start ();
+
+			tween.Update (0).Update (99.99999f);
+
+			Assert.IsTrue (tween.IsPlaying);
+		}
+
+		[Test ()]
+		public void TestIsPlaying ()
 		{
 			Tween tween = new Tween ().Delay (100);
 			Assert.IsFalse (tween.IsPlaying);
@@ -222,7 +233,37 @@ namespace tests
 			Assert.IsTrue (tween.IsPlaying);
 		}
 
+		[Test ()]
+		public void TestNow ()
+		{
+			float now = 0;
+			Tween tween = new Tween ().Call (t => now = t.Now).Start ();
+			tween.Update (173);
+			Assert.AreEqual (now, 173);
+		}
 
+		[Test ()]
+		public void TestKeyFramesCount ()
+		{
+			Tween tween = new Tween ();
+			Assert.AreEqual (tween.KeyFramesCount, 0);
+			tween.Nop ().Nop ();
+			Assert.AreEqual (tween.KeyFramesCount, 2);
+		}
+
+		[Test ()]
+		public void TestMultiObjects ()
+		{
+			this.genericValue = 0;
+			FooBar fooBar = new FooBar ();
+			Tween tween = new Tween ();
+			tween.To (this, new {genericValue = 1}, fooBar, new {counter = 17, Hidden = 30}, 2);
+			tween.Start ().Update (0).Update (1);
+			Assert.AreEqual (this.genericValue, 1f / 2);
+			Assert.AreEqual (fooBar.Hidden, 30f / 2);
+			Assert.AreEqual (fooBar.counter, 17f / 2);
+
+		}
 	}
 }
 
