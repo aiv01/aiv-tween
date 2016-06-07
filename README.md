@@ -121,6 +121,8 @@ public class TweenBehaviour : MonoBehaviour {
 }
 ```
 
+Note for Unity: use transform.eulerAngles for rotations, as Quaternions cannot be easily interpolated
+
 Delay(float t)
 --------------
 
