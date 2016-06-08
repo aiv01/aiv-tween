@@ -64,6 +64,9 @@ namespace Aiv.Tween {
 			public void AddIteration(object target, string name, object value) {
 				PropertyInfo pInfo = target.GetType().GetProperty(name);
 				FieldInfo fInfo = target.GetType().GetField(name);
+				if (pInfo == null && fInfo == null) {
+					throw new Exception("invalid field: " + name);
+				}
 				Iteration iteration = new Iteration{ target = target, pInfo = pInfo, fInfo = fInfo };
 				iteration.fieldName = name;
 				iteration.endValue = value;
