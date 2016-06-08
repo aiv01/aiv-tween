@@ -467,8 +467,15 @@ namespace tests
 			Assert.AreEqual (tween.CurrentKeyFrameIndex, 0);
 		}
 			
+		[Test ()]
+		public void TestZeroTo ()
+		{
+			this.genericValue = 0;
+			Tween tween = new Tween ().To (this, new {genericValue = 17}, 0).Start ();
+			tween.Update (0);
+			Assert.AreEqual (this.genericValue, 17);
 
-
+		}
 	}
 }
 

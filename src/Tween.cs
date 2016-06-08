@@ -468,16 +468,13 @@ namespace Aiv.Tween
 
             float gradient = 1;
             if (keyFrame.Duration > 0)
-            {
                 gradient = (this.now - keyFrame.startedAt) / keyFrame.Duration;
-            }
-            else
-            {
-            }
+
             // avoid overflow
             gradient = gradient > 1 ? 1 : gradient;
             if (gradient >= 1)
                 nextFrame = true;
+
             // apply easing
             this.currentGradient = keyFrame.Ease(gradient);
             // foreach iteration update values
